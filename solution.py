@@ -1,54 +1,44 @@
-# 1697
-# 수빈이는 동생과 숨바꼭질을 하고 있다. 수빈이는 현재 점 N(0 ≤ N ≤ 100,000)에 있고, 동생은 점 K(0 ≤ K ≤ 100,000)에 있다.
-# 수빈이는 걷거나 순간이동을 할 수 있다. 만약, 수빈이의 위치가 X일 때 걷는다면 1초 후에 X-1 또는 X+1로 이동하게 된다. 순간이동을 하는 경우에는 1초 후에 2*X의 위치로 이동하게 된다.
-# 수빈이와 동생의 위치가 주어졌을 때, 수빈이가 동생을 찾을 수 있는 가장 빠른 시간이 몇 초 후인지 구하는 프로그램을 작성하시오.
+# 영선이는 매우 기쁘기 때문에, 효빈이에게 스마일 이모티콘을 S개 보내려고 한다.
 
-# input
-# 5 17
+# 영선이는 이미 화면에 이모티콘 1개를 입력했다. 이제, 다음과 같은 3가지 연산만 사용해서 이모티콘을 S개 만들어 보려고 한다.
 
-# output
-# 4
+# 화면에 있는 이모티콘을 모두 복사해서 클립보드에 저장한다.
+# 클립보드에 있는 모든 이모티콘을 화면에 붙여넣기 한다.
+# 화면에 있는 이모티콘 중 하나를 삭제한다.
+# 모든 연산은 1초가 걸린다. 또, 클립보드에 이모티콘을 복사하면 이전에 클립보드에 있던 내용은 덮어쓰기가 된다. 클립보드가 비어있는 상태에는 붙여넣기를 할 수 없으며, 일부만 클립보드에 복사할 수는 없다. 또한, 클립보드에 있는 이모티콘 중 일부를 삭제할 수 없다. 화면에 이모티콘을 붙여넣기 하면, 클립보드에 있는 이모티콘의 개수가 화면에 추가된다.
+
+# 영선이가 S개의 이모티콘을 화면에 만드는데 걸리는 시간의 최솟값을 구하는 프로그램을 작성하시오.
+
+# 첫째 줄에 S (2 ≤ S ≤ 1000) 가 주어진다.
 
 from collections import deque
 
-max_pos = 100000
-n, k = map(int, input().split())
+N = int(input())
+emoji = [[-1 for _ in range(N+1)] for _ in range(N+1)]
 
 
-def bfs(start, finish):
-    visited = [False for i in range(max_pos + 1)]
-    depth = 0
-    queue = deque([[start, depth]])
-
+def bfs():
+    queue = deque()
+    queue.append((1, 0))
+    emoji[1][0] = 0
     while queue:
-        # print("q : ", q)
-        [pos, depth] = queue.popleft()
-
-        if not visited[pos]:
-            visited[pos] = True
-
-            if pos == finish:
-                return depth
-            depth += 1
-
-            if pos - 1 >= 0 and visited[pos - 1] == False:
-                queue.append([pos - 1, depth])
-            if pos + 1 <= max_pos and visited[pos + 1] == False:
-                queue.append([pos + 1, depth])
-            if pos * 2 <= max_pos and visited[pos * 2] == False:
-                queue.append([pos * 2, depth])
+        y, x = queue.popleft()
+        if emoji[y][y] == -1:
+            emoji[y][y] = emoji[y][x] + 1
+            queue.append((y, y))
+        if y+x <= N and emoji[y+x][x] == -1:
+            queue.append((y+x, x))
+            emoji[y+x][x] = emoji[y][x] + 1
+        if y-1 >= 0 and emoji[y-1][x] == -1:
+            queue.append((y-1, x))
+            emoji[y-1][x] = emoji[y][x] + 1
 
 
-print(bfs(n, k))
+bfs()
+ans = -1
+for i in range(N+1):
+    if emoji[N][i] != -1:
+        if ans == -1 or ans > emoji[N][i]:
+            ans = emoji[N][i]
 
-# v
-# 1 -1 *2
-
-#   5
-# 4 6 10
-# ---
-#   4       6         10
-# 3 5 8   5 7 12    9 11 20
-# ---
-#   3       5 (die)    8         5 (die)...
-# 2 4 6   4 6 10    7 9 16    4 6 10 ...
+print(ans)
